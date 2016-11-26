@@ -1,11 +1,11 @@
-//import twitter4j.util.*;
 //import twitter4j.*;
-//import twitter4j.management.*;
 //import twitter4j.api.*;
-//import twitter4j.util.function.*;
+//import twitter4j.auth.*;
 //import twitter4j.conf.*;
 //import twitter4j.json.*;
-//import twitter4j.auth.*;
+//import twitter4j.management.*;
+//import twitter4j.util.*;
+//import twitter4j.util.function.*;
 //import java.util.*;
 
 //ConfigurationBuilder cb = new ConfigurationBuilder();
@@ -13,7 +13,8 @@
 //Query queryForTwitter;
 
 //ArrayList tweets;
-//ArrayList<String> url = new ArrayList<String>();
+//ArrayList<Long> imgID = new ArrayList<Long>();
+//ArrayList<String> imgURL = new ArrayList<String>();
 //ArrayList<PImage> pic = new ArrayList<PImage>();
 ////String[] url = new String[100];
 ////PImage[] pic = new PImage[5];
@@ -22,12 +23,13 @@
 //int y = 0;
 //int nameX = 10;
 //int nameY= 10;
-//int k = 0;
+//boolean initialTweetsLoaded = false;
 
 //void setup() {
   
 //  size(1000, 1000);
 //  background(0);
+//  frameRate(2);
   
 //  //Credentials
 //  cb.setDebugEnabled(true);
@@ -38,38 +40,43 @@
 //  cb.setIncludeEntitiesEnabled(true);
 
 //  twitterInstance = new TwitterFactory(cb.build()).getInstance();
-  
-//  queryForTwitter = new Query("#nature AND filter:images");
+
+//  queryForTwitter = new Query("#sunset AND filter:images");
 //  queryForTwitter.setCount(100);
 
-//  fetchTweets();
+//  // fetchTweets();
   
-//  //thread("refreshTweets");
+//  thread("refreshTweets");
   
 //}
 
 //void draw() {
-//  drawTweets();
+//  if (initialTweetsLoaded)
+//  {
+//    drawTweets();
+//  }
+//  else
+//  {
+//    fill(255);
+//    text("Loading Tweets...", 250, 250);
+//  }
 //}
 
 //void drawTweets() {
-//  image(pic.get(k), x, y, 100, 100);
-//  x += 100;
+//  image(pic.get(counter), x, y, 250, 250);
+//  x += 250;
 //  if (x > 900) {
 //    x = 0;
-//    y += 100;
+//    y += 250;
 //  }
 //  if (y > 900) {
-//    noLoop();
+//    x = 0;
+//    y = 0;
 //  }
-//  k++;
-//  if (k == url.size()) {
-//    k = 0;
+//  counter++;
+//  if (counter == pic.size()) {
+//    counter = 0;
 //  }
-////  for (int i = 0; i < url.size(); i++) {
-//////    println(pic);
-//////    delay(1000);
-////  }
 //}
 
 //void fetchTweets() {
@@ -78,6 +85,7 @@
 //    tweets = (ArrayList) result.getTweets();
 //    for (int i = 0; i < tweets.size(); i++) {
 //      Status t = (Status) tweets.get(i);
+//      //println(t.getMediaEntities());
 //      MediaEntity[] media = t.getMediaEntities();
 //      if (media != null) {
 //        //String user = t.getUser().getName();
@@ -89,22 +97,32 @@
 //        //  nameY += 200;
 //        //}
 //        for(MediaEntity m : media) { //search trough your entities
-//          url.add(m.getMediaURL());
-//          pic.add(loadImage(url.get(counter)));
-//          counter++;
+//          imgURL.add(m.getMediaURL());
 //        }
 //      }
 //    }
-//    println(pic);
+//    removeDuplicateTweets();
+//    println(imgURL);
 //  } catch (TwitterException te) {
 //    println("Couldn't connect: " + te);
 //  } // end of catch TwitterException
-//} // end of tweets()
+// } //// end of tweets()
 
-////void refreshTweets() {
-////  while(true) {
-////    fetchTweets();
-////    println("Searching more Tweets");
-////    delay(30000);
-////  }
-////}
+//void removeDuplicateTweets() {
+//  Set<String> removeDuplicates = new LinkedHashSet<String>(imgURL);
+//  imgURL.clear();
+//  imgURL.addAll(removeDuplicates);
+//  for (int i = 0; i < imgURL.size(); i++) {
+//    pic.add(loadImage(imgURL.get(i)));
+//    println(pic);
+//  }
+//  initialTweetsLoaded = true;
+//}
+
+//void refreshTweets() {
+//  while(true) {
+//    fetchTweets();
+//    println("Searching more Tweets");
+//    delay(30000);
+//  }
+//}

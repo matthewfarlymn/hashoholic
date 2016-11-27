@@ -17,6 +17,7 @@ ControlP5 searchInput;
 
 boolean onload = true;
 boolean loading = false;
+boolean blackout = true;
 boolean searching = false;
 boolean looping = true;
 String query;
@@ -24,6 +25,7 @@ String currentQuery;
 ArrayList tweets;
 ArrayList<String> url = new ArrayList<String>();
 ArrayList<PImage> pic = new ArrayList<PImage>();
+int alpha = 200;
 int imgX = 0;
 int imgY = 0;
 int counter = 0;
@@ -32,7 +34,7 @@ void setup() {
   
   size(1000, 1100);
   background(0);
-  frameRate(4);
+  frameRate(2);
   
   PFont font = createFont("arial", 40);
   
@@ -69,13 +71,19 @@ void setup() {
 
 void draw() {
   if (loading) {
+    if (blackout) {
+      fill(0);
+      rect(0, 0, 1000, 1000);
+      blackout = false;
+    }
     drawTweets();
   } else if (searching) {
-    fill(0, 200);
+    fill(0, alpha);
+    alpha-=200;
     rect(0, 0, 1000, 1000);
     fill(255);
     text("Searching Tweets for #" + query, 250, 250);
-    searching = false;
+    blackout = true;
   } else if (onload) {
     fill(255);
     text("Start Searching Tweets", 250, 250);
@@ -109,6 +117,8 @@ void drawTweets() {
       imgX = 0;
       imgY = 0;
     }
+    fill(0, 25);
+    rect(0, 0, 1000, 1000);
     image(pic.get(counter), imgX, imgY, 250, 250);
     imgX += 250;
     counter++;
@@ -147,6 +157,8 @@ void removeDuplicates() {
     pic.add(loadImage(url.get(i)));
   }
   loading = true;
+  searching = false;
+  alpha = 200;
 }
 
 void refreshTweets() {
@@ -156,7 +168,7 @@ void refreshTweets() {
     if (query != null) {
       println("Searching Tweets");
       fetchTweets();
-      delay(15000);
+      delay(10000);
     } else {
       delay(1000);
     }
@@ -165,6 +177,7 @@ void refreshTweets() {
 
 void controlEvent(ControlEvent theEvent) {
   if(theEvent.isAssignableFrom(Textfield.class)) {
-    query = theEvent.getStringValue();
+    query = theEvent.getStringValue().replaceAll("[^A-Za-z]", "");
+    println(query);
   }
 }

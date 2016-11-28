@@ -26,6 +26,7 @@ ArrayList tweets;
 ArrayList<String> url = new ArrayList<String>();
 ArrayList<PImage> pic = new ArrayList<PImage>();
 int alpha = 200;
+int seconds = 0;
 int imgX = 0;
 int imgY = 0;
 int counter = 0;
@@ -33,8 +34,8 @@ int counter = 0;
 void setup() {
   
   size(1000, 1100);
-  background(0);
-  frameRate(2);
+  background(85, 172, 238);
+  frameRate(5);
   
   PFont font = createFont("arial", 40);
   
@@ -42,8 +43,8 @@ void setup() {
   
   int y = 20;
   int spacing = 60;
-  searchInput.addTextfield("#")
-             .setPosition(50,1020)
+  searchInput.addTextfield("Enter #")
+             .setPosition(325,1020)
              .setSize(500,60)
              .setFont(font)
              .setFocus(true)
@@ -51,7 +52,7 @@ void setup() {
              .setColorBackground(color(255))
              .getCaptionLabel()
              .align(ControlP5.LEFT_OUTSIDE, CENTER)
-             .getStyle().setPaddingLeft(-10);
+             .getStyle().setPaddingLeft(-20);
   y += spacing;
   textFont(font);
   
@@ -73,6 +74,7 @@ void draw() {
   if (loading) {
     if (blackout) {
       fill(0);
+      noStroke();
       rect(0, 0, 1000, 1000);
       blackout = false;
     }
@@ -80,15 +82,22 @@ void draw() {
   } else if (searching) {
     fill(0, alpha);
     alpha-=200;
+    noStroke();
     rect(0, 0, 1000, 1000);
+    fill(85, 172, 238);
+    rect(457.5, 537.5, 100, 50);
     fill(255);
-    text("Searching Tweets for #" + query, 250, 250);
+    textAlign(CENTER, CENTER);
+    text("Searching Twitter \n for #" + query + " Images \n " + seconds +"s", 250, 250, 500, 500);
+    seconds++;
     blackout = true;
   } else if (onload) {
     fill(255);
-    text("Start Searching Tweets", 250, 250);
+    textAlign(CENTER, CENTER);
+    text("Start Searching Twitter \n for #tagged Images", 250, 250, 500, 500);
     if (query != null) {
-      fill(0);
+      fill(85, 172, 238);
+      noStroke();
       rect(0, 0, 1000, 1000);
       onload = false;
       searching = true;
@@ -103,6 +112,7 @@ void drawTweets() {
     counter = 0;
     imgX = 0;
     imgY = 0;
+    seconds = 0;
     loading = false;
     searching = true;
   } else if (pic.size() != 0) {
@@ -118,6 +128,7 @@ void drawTweets() {
       imgY = 0;
     }
     fill(0, 25);
+    noStroke();
     rect(0, 0, 1000, 1000);
     image(pic.get(counter), imgX, imgY, 250, 250);
     imgX += 250;

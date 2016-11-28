@@ -8,12 +8,16 @@ import twitter4j.util.*;
 import twitter4j.util.function.*;
 import java.util.*;
 import controlP5.*;
+import processing.video.*;
+import processing.sound.*;
+
+ControlP5 searchInput;
+Movie intro;
+SoundFile pop;
 
 ConfigurationBuilder cb = new ConfigurationBuilder();
 Twitter twitterInstance;
 Query twitterQuery;
-
-ControlP5 searchInput;
 
 boolean onload = true;
 boolean loading = false;
@@ -26,16 +30,15 @@ ArrayList tweets;
 ArrayList<String> url = new ArrayList<String>();
 ArrayList<PImage> pic = new ArrayList<PImage>();
 int alpha = 200;
-int seconds = 0;
+int seconds = 1;
 int imgX = 0;
 int imgY = 0;
 int counter = 0;
 
 void setup() {
   
-  size(1000, 1100);
+  size(1250, 850);
   background(85, 172, 238);
-  frameRate(5);
   
   PFont font = createFont("arial", 40);
   
@@ -44,8 +47,8 @@ void setup() {
   int y = 20;
   int spacing = 60;
   searchInput.addTextfield("Enter #")
-             .setPosition(325,1020)
-             .setSize(500,60)
+             .setPosition(475, 770)
+             .setSize(500, 60)
              .setFont(font)
              .setFocus(true)
              .setColor(color(0))
@@ -55,6 +58,11 @@ void setup() {
              .getStyle().setPaddingLeft(-20);
   y += spacing;
   textFont(font);
+  
+  intro = new Movie(this, "intro.mp4");
+  intro.loop();
+  
+  pop = new SoundFile(this, "pop.wav");
   
   //Credentials
   cb.setDebugEnabled(true);
@@ -73,32 +81,36 @@ void setup() {
 void draw() {
   if (loading) {
     if (blackout) {
-      fill(0);
+      fill(0, alpha);
       noStroke();
-      rect(0, 0, 1000, 1000);
+      rect(0, 0, 1250, 750);
       blackout = false;
     }
     drawTweets();
   } else if (searching) {
+    frameRate(1);
+    pop.play();
     fill(0, alpha);
     alpha-=200;
     noStroke();
-    rect(0, 0, 1000, 1000);
+    rect(0, 0, 1250, 750);
     fill(85, 172, 238);
-    rect(457.5, 537.5, 100, 50);
+    rect(580.5, 412.5, 100, 50);
     fill(255);
     textAlign(CENTER, CENTER);
-    text("Searching Twitter \n for #" + query + " Images \n " + seconds +"s", 250, 250, 500, 500);
+    text("Searching Twitter \n for #" + query + " Images \n " + seconds +"s", 375, 125, 500, 500);
     seconds++;
     blackout = true;
   } else if (onload) {
+    frameRate(24);
+    image(intro, 0, 0, 1333, 750);
     fill(255);
     textAlign(CENTER, CENTER);
-    text("Start Searching Twitter \n for #tagged Images", 250, 250, 500, 500);
+    text("Start Searching Twitter \n for #tagged Images", 375, 125, 500, 500);
     if (query != null) {
       fill(85, 172, 238);
       noStroke();
-      rect(0, 0, 1000, 1000);
+      rect(0, 0, 1250, 750);
       onload = false;
       searching = true;
     }
@@ -112,24 +124,25 @@ void drawTweets() {
     counter = 0;
     imgX = 0;
     imgY = 0;
-    seconds = 0;
+    seconds = 1;
     loading = false;
     searching = true;
   } else if (pic.size() != 0) {
+    frameRate(5);
     if (counter >= pic.size()) {
       counter = 0;
     }
-    if (imgX > 900) {
+    if (imgX > 1000) {
       imgX = 0;
       imgY += 250;
     }
-    if (imgY >= 900) {
+    if (imgY >= 750) {
       imgX = 0;
       imgY = 0;
     }
     fill(0, 25);
     noStroke();
-    rect(0, 0, 1000, 1000);
+    rect(0, 0, 1250, 750);
     image(pic.get(counter), imgX, imgY, 250, 250);
     imgX += 250;
     counter++;
@@ -188,7 +201,11 @@ void refreshTweets() {
 
 void controlEvent(ControlEvent theEvent) {
   if(theEvent.isAssignableFrom(Textfield.class)) {
-    query = theEvent.getStringValue().replaceAll("[^A-Za-z]", "");
+    query = theEvent.getStringValue().replaceAll("[^A-Za-z0-9]", "");
     println(query);
   }
+}
+
+void movieEvent(Movie m) {
+  m.read();
 }

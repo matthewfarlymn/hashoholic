@@ -19,11 +19,17 @@ ConfigurationBuilder cb = new ConfigurationBuilder();
 Twitter twitterInstance;
 Query twitterQuery;
 
+XML xml;
 boolean onload = true;
 boolean loading = false;
 boolean blackout = true;
 boolean searching = false;
+boolean notification = false;
 boolean looping = true;
+String consumerKey;
+String consumerSecret;
+String accessToken;
+String accessTokenSecret;
 String query;
 String currentQuery;
 ArrayList tweets;
@@ -39,6 +45,7 @@ void setup() {
   
   size(1250, 850);
   background(85, 172, 238);
+  frameRate(2);
   
   PFont font = createFont("arial", 40);
   
@@ -64,12 +71,22 @@ void setup() {
   
   pop = new SoundFile(this, "pop.wav");
   
+  xml = loadXML("credentials.xml");
+  XML[] credentials = xml.getChildren("oauth");
+  
+  for (int i = 0; i < credentials.length; i++) {
+    consumerKey = credentials[i].getString("consumerKey");
+    consumerSecret = credentials[i].getString("consumerSecret");
+    accessToken = credentials[i].getString("accessToken");
+    accessTokenSecret = credentials[i].getString("accessTokenSecret");
+  }
+  
   //Credentials
   cb.setDebugEnabled(true);
-  cb.setOAuthConsumerKey("DcUeHEdczixliws57OUri2sYi");
-  cb.setOAuthConsumerSecret("5wl1Scpbt4dUM4IASQxrLrGxExeMb1ZE6q95rcMR73BjM4iuDm");
-  cb.setOAuthAccessToken("798873694177214465-OQMUPm98frvFQumfbMyLbkmh2B7W2Ls");
-  cb.setOAuthAccessTokenSecret("PU422R45tOsPHd1MPfUVvoon9kQxRRT1hy4H7rpxwmNPU");
+  cb.setOAuthConsumerKey(consumerKey);
+  cb.setOAuthConsumerSecret(consumerSecret);
+  cb.setOAuthAccessToken(accessToken);
+  cb.setOAuthAccessTokenSecret(accessTokenSecret);
   cb.setIncludeEntitiesEnabled(true);
 
   twitterInstance = new TwitterFactory(cb.build()).getInstance();
@@ -80,6 +97,17 @@ void setup() {
 
 void draw() {
   if (loading) {
+    if (mouseX < 250) {
+      frameRate(1);
+    } else if (mouseX > 250 && mouseX < 500) {
+      frameRate(2);
+    } else if (mouseX > 500 && mouseX < 750) {
+      frameRate(3);
+    } else if (mouseX > 750 && mouseX < 1000) {
+      frameRate(4);
+    }  else {
+      frameRate(5);
+    }
     if (blackout) {
       fill(0, alpha);
       noStroke();
@@ -90,23 +118,30 @@ void draw() {
   } else if (searching) {
     frameRate(1);
     pop.play();
+    pop.rate(1.50);
     fill(0, alpha);
     alpha-=200;
     noStroke();
     rect(0, 0, 1250, 750);
     fill(85, 172, 238);
-    rect(580.5, 412.5, 100, 50);
+    rect(575.5, 412.5, 100, 50);
     fill(255);
     textAlign(CENTER, CENTER);
-    text("Searching Twitter \n for #" + query + " Images \n " + seconds +"s", 375, 125, 500, 500);
+    text("Searching Twitter\nfor #" + query + " Images\n" + seconds +"s", 375, 125, 500, 500);
     seconds++;
     blackout = true;
+    if (notification) {
+      fill(255);
+      textAlign(CENTER, CENTER);
+      text("Please wait until current search completes.", 0, 675, 1250, 60);
+      notification = false;
+    }
   } else if (onload) {
-    frameRate(24);
+    frameRate(30);
     image(intro, 0, 0, 1333, 750);
     fill(255);
     textAlign(CENTER, CENTER);
-    text("Start Searching Twitter \n for #tagged Images", 375, 125, 500, 500);
+    text("Start Searching Twitter\nfor #tagged Images", 375, 125, 500, 500);
     if (query != null) {
       fill(85, 172, 238);
       noStroke();
@@ -118,7 +153,8 @@ void draw() {
 }
 
 void drawTweets() {
-  if (query != currentQuery) {
+  if (!query.equals(currentQuery)) {
+    println(query + currentQuery);
     url.clear();
     pic.clear();
     counter = 0;
@@ -128,7 +164,6 @@ void drawTweets() {
     loading = false;
     searching = true;
   } else if (pic.size() != 0) {
-    frameRate(5);
     if (counter >= pic.size()) {
       counter = 0;
     }
@@ -158,12 +193,9 @@ void fetchTweets() {
     tweets = (ArrayList) result.getTweets();
     for (int i = 0; i < tweets.size(); i++) {
       Status t = (Status) tweets.get(i);
-      //println(t.getMediaEntities());
       MediaEntity[] media = t.getMediaEntities();
-      if (media != null) {
-        for(MediaEntity m : media) { //search trough your entities
-          url.add(m.getMediaURL());
-        }
+      for(MediaEntity m : media) { //search trough your entities
+        url.add(m.getMediaURL());
       }
     }
     removeDuplicates();
@@ -176,7 +208,6 @@ void removeDuplicates() {
   Set<String> removeDuplicates = new LinkedHashSet<String>(url);
   url.clear();
   url.addAll(removeDuplicates);
-  //println(url);
   for (int i = 0; i < url.size(); i++) {
     pic.add(loadImage(url.get(i)));
   }
@@ -187,12 +218,12 @@ void removeDuplicates() {
 
 void refreshTweets() {
   while(looping) {
-    url.clear();
-    pic.clear();
     if (query != null) {
+      url.clear();
+      pic.clear();
       println("Searching Tweets");
       fetchTweets();
-      delay(10000);
+      delay(15000);
     } else {
       delay(1000);
     }
@@ -201,8 +232,12 @@ void refreshTweets() {
 
 void controlEvent(ControlEvent theEvent) {
   if(theEvent.isAssignableFrom(Textfield.class)) {
-    query = theEvent.getStringValue().replaceAll("[^A-Za-z0-9]", "");
-    println(query);
+    if(!searching) {
+      query = theEvent.getStringValue().replaceAll("[^A-Za-z0-9]", "");
+      println(query);
+    } else {
+      notification = true;
+    }
   }
 }
 

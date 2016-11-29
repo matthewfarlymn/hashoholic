@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-cb.setDebugEnabled(true);
-cb.setOAuthConsumerKey("DcUeHEdczixliws57OUri2sYi");
-cb.setOAuthConsumerSecret("5wl1Scpbt4dUM4IASQxrLrGxExeMb1ZE6q95rcMR73BjM4iuDm");
-cb.setOAuthAccessToken("798873694177214465-OQMUPm98frvFQumfbMyLbkmh2B7W2Ls");
-cb.setOAuthAccessTokenSecret("PU422R45tOsPHd1MPfUVvoon9kQxRRT1hy4H7rpxwmNPU");
-cb.setIncludeEntitiesEnabled(true);

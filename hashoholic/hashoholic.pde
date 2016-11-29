@@ -20,12 +20,14 @@ Twitter twitterInstance;
 Query twitterQuery;
 
 XML xml;
+PImage icon;
+boolean looping = true;
 boolean onload = true;
 boolean loading = false;
 boolean blackout = true;
 boolean searching = false;
 boolean notification = false;
-boolean looping = true;
+boolean error = false;
 String consumerKey;
 String consumerSecret;
 String accessToken;
@@ -35,7 +37,7 @@ String currentQuery;
 ArrayList tweets;
 ArrayList<String> url = new ArrayList<String>();
 ArrayList<PImage> pic = new ArrayList<PImage>();
-int alpha = 200;
+int alpha = 250;
 int seconds = 1;
 int imgX = 0;
 int imgY = 0;
@@ -54,7 +56,7 @@ void setup() {
   int y = 20;
   int spacing = 60;
   searchInput.addTextfield("Enter #")
-             .setPosition(475, 770)
+             .setPosition(465, 770)
              .setSize(500, 60)
              .setFont(font)
              .setFocus(true)
@@ -68,6 +70,8 @@ void setup() {
   
   intro = new Movie(this, "intro.mp4");
   intro.loop();
+  
+  icon = loadImage("icon.png");
   
   pop = new SoundFile(this, "pop.wav");
   
@@ -116,38 +120,49 @@ void draw() {
     }
     drawTweets();
   } else if (searching) {
-    frameRate(1);
-    pop.play();
-    pop.rate(1.50);
-    fill(0, alpha);
-    alpha-=200;
-    noStroke();
-    rect(0, 0, 1250, 750);
-    fill(85, 172, 238);
-    rect(575.5, 412.5, 100, 50);
-    fill(255);
-    textAlign(CENTER, CENTER);
-    text("Searching Twitter\nfor #" + query + " Images\n" + seconds +"s", 375, 125, 500, 500);
-    seconds++;
-    blackout = true;
+    if (error) {
+      fill(255);
+      textAlign(CENTER, CENTER);
+      text("Search returned no images.", 0, 675, 1250, 60);
+      error = false;
+      searching = false;
+      loading = true;
+    }
     if (notification) {
       fill(255);
       textAlign(CENTER, CENTER);
       text("Please wait until current search completes.", 0, 675, 1250, 60);
       notification = false;
     }
-  } else if (onload) {
-    frameRate(30);
-    image(intro, 0, 0, 1333, 750);
+    frameRate(1);
+    pop.play();
+    pop.rate(1.50);
+    fill(0, alpha);
+    alpha-=250;
+    noStroke();
+    rect(0, 0, 1250, 750);
+    fill(85, 172, 238);
+    rect(575.5, 412.5, 100, 50);
+    image(icon, 575, 200, 100, 100);
     fill(255);
     textAlign(CENTER, CENTER);
-    text("Start Searching Twitter\nfor #tagged Images", 375, 125, 500, 500);
+    text("Searching Twitter\nfor #" + query + " Images\n" + seconds +"s", 0, 125, 1250, 500);
+    seconds++;
+    blackout = true;
+  } else if (onload) {
     if (query != null) {
       fill(85, 172, 238);
       noStroke();
       rect(0, 0, 1250, 750);
       onload = false;
       searching = true;
+    } else {
+      frameRate(30);
+      image(intro, 0, 0, 1333, 750);
+      image(icon, 575, 225, 100, 100);
+      fill(255);
+      textAlign(CENTER, CENTER);
+      text("Start Searching Twitter\nfor #tagged Images", 0, 125, 1250, 500);
     }
   }
 }
@@ -163,6 +178,7 @@ void drawTweets() {
     seconds = 1;
     loading = false;
     searching = true;
+    alpha = 250;
   } else if (pic.size() != 0) {
     if (counter >= pic.size()) {
       counter = 0;
@@ -211,9 +227,13 @@ void removeDuplicates() {
   for (int i = 0; i < url.size(); i++) {
     pic.add(loadImage(url.get(i)));
   }
-  loading = true;
-  searching = false;
-  alpha = 200;
+  if (pic.size() != 0) {
+    loading = true;
+    searching = false;
+    alpha = 250;
+  } else {
+    error = true;
+  }
 }
 
 void refreshTweets() {

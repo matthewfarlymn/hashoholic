@@ -1,2 +1,3 @@
 # Rich Media Programming - 2.0
-This Processing sketch collects and displays recent images based on user queried hashtags.
+**Hashoholic**
+A Processing sketch which collects and displays recent Twitter images based on user queried hashtags.
